@@ -46,8 +46,9 @@ const CACHED_IMAGE_REF = 'cachedImage';
 const CachedImage = createReactClass({
     propTypes: {
         renderImage: PropTypes.func,
-        renderLoader: PropTypes.func,
+        loadingIndicator: PropTypes.element,
         renderError: PropTypes.func,
+        showLoader: PropTypes.bool,
         activityIndicatorProps: PropTypes.object.isRequired,
         useQueryParamsInCacheKey: PropTypes.oneOfType([
             PropTypes.bool,
@@ -65,6 +66,7 @@ const CachedImage = createReactClass({
                 let Img = (ImageBackground || Image);
                 return (<Img {...props}/>);
             },
+            showLoader: true,
             activityIndicatorProps: {},
             useQueryParamsInCacheKey: false,
             cacheLocation: ImageCacheProvider.LOCATION.CACHE
@@ -193,6 +195,10 @@ const CachedImage = createReactClass({
     },
 
     renderLoader() {
+        if (!this.props.showLoader) {
+            return null;
+        }
+
         const imageProps = getImageProps(this.props);
         const imageStyle = [this.props.style, styles.loaderPlaceholder];
 
