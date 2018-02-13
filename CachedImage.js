@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const React = require('react');
 const ReactNative = require('react-native');
+const PropTypes = require('prop-types');
+const createReactClass = require('create-react-class');
 const flattenStyle = ReactNative.StyleSheet.flatten;
 const ImageCacheProvider = require('./ImageCacheProvider');
 
@@ -41,17 +43,17 @@ function getImageProps(props) {
 
 const CACHED_IMAGE_REF = 'cachedImage';
 
-const CachedImage = React.createClass({
+const CachedImage = createReactClass({
     propTypes: {
-        renderImage: React.PropTypes.func,
-        renderLoader: React.PropTypes.func,
-        renderError: React.PropTypes.func,
-        activityIndicatorProps: React.PropTypes.object.isRequired,
-        useQueryParamsInCacheKey: React.PropTypes.oneOfType([
-            React.PropTypes.bool,
-            React.PropTypes.array
+        renderImage: PropTypes.func,
+        renderLoader: PropTypes.func,
+        renderError: PropTypes.func,
+        activityIndicatorProps: PropTypes.object.isRequired,
+        useQueryParamsInCacheKey: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.array
         ]).isRequired,
-        cacheLocation: React.PropTypes.string
+        cacheLocation: PropTypes.string
     },
 
     getDefaultProps(){
@@ -96,7 +98,7 @@ const CachedImage = React.createClass({
 
     componentWillMount() {
         this._isMounted = true;
-        NetInfo.isConnected.addEventListener('change', this.handleConnectivityChange);
+        NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange);
         // initial
         NetInfo.isConnected.fetch()
             .then(isConnected => {
@@ -110,7 +112,7 @@ const CachedImage = React.createClass({
 
     componentWillUnmount() {
         this._isMounted = false;
-        NetInfo.isConnected.removeEventListener('change', this.handleConnectivityChange);
+        NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange);
     },
 
     componentWillReceiveProps(nextProps) {
@@ -171,16 +173,16 @@ const CachedImage = React.createClass({
         const props = getImageProps(this.props);
         const style = this.props.style || styles.image;
         const source = (this.state.isCacheable && this.state.cachedImagePath) ? {
-                uri: 'file://' + this.state.cachedImagePath
-            } : this.props.source;
+            uri: 'file://' + this.state.cachedImagePath
+        } : this.props.source;
 
         if (this.props.fallbackSource && !this.state.cachedImagePath) {
-          return this.props.renderImage({
-              ...props,
-              key: `${props.key || source.uri}error`,
-              style,
-              source: this.props.fallbackSource
-          });
+            return this.props.renderImage({
+                ...props,
+                key: `${props.key || source.uri}error`,
+                style,
+                source: this.props.fallbackSource
+            });
         }
         return this.props.renderImage({
             ...props,
@@ -205,11 +207,11 @@ const CachedImage = React.createClass({
         // so we only show the ActivityIndicator
         if (!source || (Platform.OS === 'android' && flattenStyle(imageStyle).borderRadius)) {
             if (LoadingIndicator) {
-              return (
-                <View style={[imageStyle, activityIndicatorStyle]}>
-                  <LoadingIndicator {...activityIndicatorProps} />
-                </View>
-              );
+                return (
+                    <View style={[imageStyle, activityIndicatorStyle]}>
+                        <LoadingIndicator {...activityIndicatorProps} />
+                    </View>
+                );
             }
             return (
                 <ActivityIndicator
@@ -225,12 +227,12 @@ const CachedImage = React.createClass({
             source,
             children: (
                 LoadingIndicator
-                  ? <View style={[imageStyle, activityIndicatorStyle]}>
-                      <LoadingIndicator {...activityIndicatorProps} />
+                    ? <View style={[imageStyle, activityIndicatorStyle]}>
+                        <LoadingIndicator {...activityIndicatorProps} />
                     </View>
-                  : <ActivityIndicator
-                      {...activityIndicatorProps}
-                      style={activityIndicatorStyle}/>
+                    : <ActivityIndicator
+                        {...activityIndicatorProps}
+                        style={activityIndicatorStyle}/>
             )
         });
     },
